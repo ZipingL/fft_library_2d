@@ -1,5 +1,5 @@
 //
-// Created by a0232832 on 6/20/2019.
+// Created by Ziping Liu on 6/20/2019.
 //
 
 #ifndef FFT1D_FFTLIB_H
