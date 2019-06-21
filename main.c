@@ -50,39 +50,38 @@ typedef double complex cmplx;
 
 
 
-
-//#define TEST1DFFT 1
-//#define TEST1DFFT_PREALLOCATE 1
-#define TEST2DFFT
+//#define TEST1DFFT
+//#define TEST1DFFT_PREALLOCATE
+ #define TEST2DFFT
 #define TEST2DFFT_preallocate
 int main()
 {
 
 #ifdef TEST1DFFT
     int N = 4;
-    cmplx* buf_0 = malloc(sizeof(cmplx)*N);
-    cmplx* buf_1 = malloc(sizeof(cmplx)*N);
     cmplx* buf_samples = malloc(sizeof(cmplx)*N);
-    cmplx* buf_out_even = malloc(sizeof(cmplx)*N);
-    cmplx* buf_out_odd = malloc(sizeof(cmplx)*N);
-
     buf_samples[0] = 0;
     buf_samples[1] = 1;
     buf_samples[2] = 0;
     buf_samples[3] = -1;
 
     cmplx* output = NULL;
-#ifdef TEST1DFFT_PREALLOCATE
-    FFT_preallocation_expected(buf_samples, N, buf_0, buf_1, buf_out_even, buf_out_odd, false, false);
-    output = buf_out_even;
-#else
+    #ifdef TEST1DFFT_PREALLOCATE
+        BinaryTree * output_tree = FFT_preallocate_memory(N);
+        FFT_preallocation_expected(buf_samples, N, output_tree);
+        output = output_tree->output_buf;
+        show("", output, N);
+        FFT_free_tree(output_tree);
+
+    #else
     output = FFT(buf_samples, N);
-#endif
-
     show("", output, N);
-
-
     free(output);
+
+    #endif
+
+
+    free(buf_samples);
 
 #endif
 
