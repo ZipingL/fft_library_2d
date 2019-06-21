@@ -4,10 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "C:/build/fft1d/FFTLib.c" "C:/build/fft1d/cmake-build-debug/CMakeFiles/fft1d.dir/FFTLib.c.obj"
-  "C:/build/fft1d/main.c" "C:/build/fft1d/cmake-build-debug/CMakeFiles/fft1d.dir/main.c.obj"
+  "/Users/zipingliu/CLionProjects/fft_library_2d/FFTLib.c" "/Users/zipingliu/CLionProjects/fft_library_2d/cmake-build-debug/CMakeFiles/fft1d.dir/FFTLib.c.o"
+  "/Users/zipingliu/CLionProjects/fft_library_2d/main.c" "/Users/zipingliu/CLionProjects/fft_library_2d/cmake-build-debug/CMakeFiles/fft1d.dir/main.c.o"
   )
-set(CMAKE_C_COMPILER_ID "GNU")
+set(CMAKE_C_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH

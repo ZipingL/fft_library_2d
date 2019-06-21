@@ -1,10 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/fft1d.dir/main.c.obj"
-  "CMakeFiles/fft1d.dir/FFTLib.c.obj"
+  "CMakeFiles/fft1d.dir/main.c.o"
+  "CMakeFiles/fft1d.dir/FFTLib.c.o"
   "fft1d.pdb"
-  "fft1d.exe"
-  "fft1d.exe.manifest"
-  "libfft1d.dll.a"
+  "fft1d"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -1,12 +1,17 @@
 //
-// Created by a0232832 on 6/20/2019.
+// Created by Ziping Liu on 6/20/2019.
 //
 
 #include "FFTLib.h"
-#define swap(a, b, temp)        \
-        temp = a;               \
-        a = b;                  \
-        b = temp;
+
+
+void show(const char * s, cmplx buf[], size_t N) {
+    printf("%s", s);
+    for (int i = 0; i < N; i++)
+        printf("(%g, %gj) %s ", creal(buf[i]), cimag(buf[i]), i == (N-1) ? "":"|");
+
+    printf("\n");
+}
 
 
 
@@ -58,10 +63,10 @@ cmplx* FFT(cmplx* samples, size_t size)
         // adding a negative in front does the same job
         output[i + size_halved] = f_even[i] - exponential;
     }
-    if(f_even != NULL)
-        free(f_even);
-    if(f_even != NULL)
-        free(f_odd);
+    //if(f_even != NULL)
+        //free(f_even);
+  //  if(f_even != NULL)
+        //free(f_odd);
     return output;
 }
 
@@ -85,6 +90,9 @@ cmplx** FFT2(cmplx** samples, size_t num_rows, size_t num_cols)
             column[j] = samples[j][i];
 
         output_pre_transpose[i] = FFT(column, num_rows);
+
+        if(i == 0)
+            show("first FFT: ", output_pre_transpose[i], num_rows);
     }
 
     // Transpose the output //
@@ -177,7 +185,7 @@ void FFT_preallocation_expected(cmplx* samples, size_t size, cmplx* buff_0, cmpl
 
 
 void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_cols, cmplx** output_pre_transpose,
-                                    cmplx* buf_0, cmplx* buf_1, cmplx* output_buff_even, cmplx* output_buff_odd)
+                                    cmplx** buf_0, cmplx** buf_1, cmplx** output_buff_even, cmplx** output_buff_odd)
 {
 
 
@@ -193,8 +201,11 @@ void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_co
         for(int j = 0; j < num_rows; j++)
             column[j] = samples[j][i];
 
-        FFT_preallocation_expected(column, num_cols, buf_0, buf_1, output_buff_even, output_buff_odd, false, false);
-        output_pre_transpose[i] = output_buff_even;
+        FFT_preallocation_expected(column, num_cols, buf_0[i], buf_1[i], output_buff_even[i], output_buff_odd[i], false, false);
+        output_pre_transpose[i] = output_buff_even[i];
+
+        if(i == 0)
+            show("first FFT: ", output_pre_transpose[i], num_rows);
     }
 
     // Transpose the output //
@@ -208,8 +219,8 @@ void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_co
 
     for(int i = 0; i < num_rows; i++)
     {
-        FFT_preallocation_expected(samples[i], num_rows, buf_0, buf_1, output_buff_even, output_buff_odd, false, false);
-        output_pre_transpose[i] = output_buff_even;
+        FFT_preallocation_expected(samples[i], num_rows, buf_0[i], buf_1[i], output_buff_even[i], output_buff_odd[i], false, false);
+        output_pre_transpose[i] = output_buff_even[i];
     }
 
     /* Total Time complexity == row_length*col_length*log(row_len + col_len) */

@@ -47,14 +47,6 @@
 
 typedef double complex cmplx;
 
-void show(const char * s, cmplx buf[], size_t N) {
-    printf("%s", s);
-    for (int i = 0; i < N; i++)
-        printf("(%g, %gj) %s ", creal(buf[i]), cimag(buf[i]), i == (N-1) ? "":"|");
-
-    printf("\n");
-}
-
 
 
 
@@ -63,7 +55,6 @@ void show(const char * s, cmplx buf[], size_t N) {
 //#define TEST1DFFT_PREALLOCATE 1
 #define TEST2DFFT
 #define TEST2DFFT_preallocate
-#define TEST2DFFT
 int main()
 {
 
@@ -123,11 +114,23 @@ int main()
             x_n_2d_malloc[i][j] = data_in[i][j];
         }
     }
-    cmplx* buf_0 = malloc(sizeof(cmplx)*N);
-    cmplx* buf_1 = malloc(sizeof(cmplx)*N);
-    cmplx* buf_samples = malloc(sizeof(cmplx)*N);
-    cmplx* buf_out_even = malloc(sizeof(cmplx)*N);
-    cmplx* buf_out_odd = malloc(sizeof(cmplx)*N);
+
+    cmplx** buf_0 = malloc(sizeof(cmplx*)*N);
+    cmplx** buf_1 = malloc(sizeof(cmplx*)*N);
+    cmplx** buf_samples = malloc(sizeof(cmplx*)*N);
+    cmplx** buf_out_even = malloc(sizeof(cmplx*)*N);
+    cmplx** buf_out_odd = malloc(sizeof(cmplx*)*N);
+
+
+    for(int i = 0; i < N; i++) {
+
+        buf_0[i] = malloc(sizeof(cmplx) * N);
+        buf_1[i] = malloc(sizeof(cmplx) * N);
+        buf_samples[i] = malloc(sizeof(cmplx) * N);
+        buf_out_even[i] = malloc(sizeof(cmplx) * N);
+        buf_out_odd[i] = malloc(sizeof(cmplx) * N);
+
+    }
 
     /*void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_cols,
      * cmplx** output_pre_transpose,
@@ -164,9 +167,9 @@ int main()
     for(int i = 0; i < N; i++)
     {
         free(x_n_2d_malloc[i]);
-        free(output_2d[i]);
+        //free(output_2d[i]);
     }
-    free(output_2d);
+    //free(output_2d);
     free(x_n_2d_malloc);
     printf("fft2 cycle start: %10u \nfft2 cycle  stop: %10u \n", cycles1, cycles2);
 #endif
