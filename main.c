@@ -115,20 +115,10 @@ int main()
         }
     }
 
-    cmplx** buf_0 = malloc(sizeof(cmplx*)*N);
-    cmplx** buf_1 = malloc(sizeof(cmplx*)*N);
-    cmplx** buf_samples = malloc(sizeof(cmplx*)*N);
-    cmplx** buf_out_even = malloc(sizeof(cmplx*)*N);
-    cmplx** buf_out_odd = malloc(sizeof(cmplx*)*N);
     BinaryTree** tree_vector = malloc(sizeof(BinaryTree*)*N);
 
     for(int i = 0; i < N; i++) {
 
-        buf_0[i] = malloc(sizeof(cmplx) * N);
-        buf_1[i] = malloc(sizeof(cmplx) * N);
-        buf_samples[i] = malloc(sizeof(cmplx) * N);
-        buf_out_even[i] = malloc(sizeof(cmplx) * N);
-        buf_out_odd[i] = malloc(sizeof(cmplx) * N);
         tree_vector[i] = FFT_preallocate_memory(N);
     }
 
