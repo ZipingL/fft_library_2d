@@ -120,7 +120,7 @@ int main()
     cmplx** buf_samples = malloc(sizeof(cmplx*)*N);
     cmplx** buf_out_even = malloc(sizeof(cmplx*)*N);
     cmplx** buf_out_odd = malloc(sizeof(cmplx*)*N);
-
+    BinaryTree** tree_vector = malloc(sizeof(BinaryTree*)*N);
 
     for(int i = 0; i < N; i++) {
 
@@ -129,20 +129,18 @@ int main()
         buf_samples[i] = malloc(sizeof(cmplx) * N);
         buf_out_even[i] = malloc(sizeof(cmplx) * N);
         buf_out_odd[i] = malloc(sizeof(cmplx) * N);
-
+        tree_vector[i] = FFT_preallocate_memory(N);
     }
 
-    /*void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_cols,
-     * cmplx** output_pre_transpose,
-       cmplx* buf_0, cmplx* buf_1, cmplx* output_buff_even, cmplx* output_buff_odd); */
-    FFT2_preallocation_expected(x_n_2d_malloc, N, N, output_2d_prealloc, buf_0, buf_1, buf_out_even, buf_out_odd);
+
+    FFT2_preallocation_expected(x_n_2d_malloc, N, N, output_2d_prealloc, tree_vector);
     cmplx** output_2d = output_2d_prealloc;
 #else
     cmplx** output_2d = FFT2(x_n_2d_malloc,N, N);
 #endif
     RDTSC_STOP(cycles2);
 
-    printf("fft2 output for %dx%d input\n", N,N);
+    printf("\n\nfft2 output for %dx%d input\n", N,N);
 
     for(int i = 0; i < N; i++)
     {
@@ -167,9 +165,17 @@ int main()
     for(int i = 0; i < N; i++)
     {
         free(x_n_2d_malloc[i]);
-        //free(output_2d[i]);
+
+#ifdef TEST2DFFT_preallocate
+        free(output_2d[i]);
+        FFT_free_tree(tree_vector[i]);
+#endif
     }
-    //free(output_2d);
+
+#ifdef TEST2DFFT_preallocate
+    free(output_2d);
+    free(tree_vector);
+#endif
     free(x_n_2d_malloc);
     printf("fft2 cycle start: %10u \nfft2 cycle  stop: %10u \n", cycles1, cycles2);
 #endif
