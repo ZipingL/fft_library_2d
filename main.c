@@ -1,3 +1,5 @@
+/*Author: Ziping Liu*/
+
 #include <stdio.h>
 #include <math.h>
 #include <complex.h>
@@ -43,17 +45,16 @@
 
 
 
-/*Author: Ziping Liu*/
 
 typedef double complex cmplx;
 
 
 
 
-//#define TEST1DFFT
+#define TEST1DFFT
 //#define TEST1DFFT_PREALLOCATE
- #define TEST2DFFT
-#define TEST2DFFT_preallocate
+ //#define TEST2DFFT
+//#define TEST2DFFT_preallocate
 int main()
 {
 
@@ -65,6 +66,14 @@ int main()
     buf_samples[2] = 0;
     buf_samples[3] = -1;
 
+    fixed_complex* buf_samples_fixed = malloc(sizeof(fixed_complex)*N);
+
+    for(int i = 0; i < N; i ++)
+    {
+        buf_samples_fixed[i].real = fix16_from_dbl(buf_samples[i]);
+        buf_samples_fixed[i].imaginary = fix16_to_dbl(0.0);
+    }
+
     cmplx* output = NULL;
     #ifdef TEST1DFFT_PREALLOCATE
         BinaryTree * output_tree = FFT_preallocate_memory(N);
@@ -74,8 +83,8 @@ int main()
         FFT_free_tree(output_tree);
 
     #else
-    output = FFT(buf_samples, N);
-    show("", output, N);
+    fixed_complex* fixed_output = FFT_fixed(buf_samples_fixed, N);
+    show_fixed("", fixed_output, N);
     free(output);
 
     #endif

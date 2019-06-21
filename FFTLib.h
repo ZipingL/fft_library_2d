@@ -10,6 +10,7 @@
 #include "math.h"
 #include <stdlib.h>
 #include "stdbool.h"
+#include "libfixmath/fixmath.h"
 
 
 typedef double complex cmplx;
@@ -24,11 +25,18 @@ struct BinaryTree
     cmplx* samples_odd;
 };
 
+struct fixed_complex
+{
+    fix16_t real;
+    fix16_t imaginary;
+}; typedef struct fixed_complex fixed_complex;
+
 //TODO: free tree
 typedef struct BinaryTree BinaryTree;
 
 
 void show(const char * s, cmplx buf[], size_t N);
+void show_fixed(const char * s, fixed_complex buf[], size_t N);
 
 /*
  * Returns an array of complex numbers that is the FFT of the given array of samples with specified size.
@@ -71,5 +79,10 @@ void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_co
  */
 BinaryTree* FFT_preallocate_memory(size_t size);
 void FFT_free_tree(BinaryTree* tree);
+
+
+
+fixed_complex* FFT_fixed(fixed_complex* samples, size_t size);
+
 
 #endif //FFT1D_FFTLIB_H
