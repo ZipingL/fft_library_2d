@@ -15,8 +15,6 @@ void generateTwiddles(size_t size, complex_number_t ** fixed_out)
     int32_t size_temp = size;
     int32_t twiddle_size = 0;
 
-    *fixed_out = (complex_number_t*)malloc(sizeof(complex_number_t)*size);
-
     while(size_temp > 1)
     {
         size_temp = floor(size_temp  /2);
@@ -28,18 +26,23 @@ void generateTwiddles(size_t size, complex_number_t ** fixed_out)
 
     size_temp = size;
     int j = 0;
+
+    int stage = 1;
     while(size_temp > 1)
     {
+
+
         for(int i = 0; i < floor(size_temp / 2 ); i ++,j++)
         {
+
             (*fixed_out)[j].real =cos(-2*M_PI*i / floor(size_temp)) * pow(2, 15);
-            (*fixed_out)[j].imag =sin(-2*M_PI*i / floor(size_temp)) * pow(2,15);
+            (*fixed_out)[j].imag =sin(-2*M_PI*i / floor(size_temp)) * pow(2,15) ;
         }
 
+        stage++;
         size_temp = floor(size_temp / 2);
     }
 }
-
 
 void free_node(BinaryTree* tree)
 {
@@ -286,106 +289,6 @@ BinaryTree* FFT_preallocation_expected(cmplx* samples, size_t size, BinaryTree *
 
 }
 
-
-void FFT2_preallocation_expected(cmplx** samples, size_t num_rows, size_t num_cols, cmplx** output_pre_transpose,
-                                   BinaryTree* output[])
-{
-
-
-    /* Do a set of FFT's on the columns of the input image "samples" */
-    // Time complexity = num_col*num_rows*log(num_rows)
-    cmplx* column = malloc(sizeof(cmplx)*num_rows);
-
-    //cmplx ** output_pre_transpose = malloc(sizeof(cmplx*)*num_rows);
-    for(int i = 0; i < num_cols; i ++)
-    {
-        output_pre_transpose[i] = malloc(sizeof(cmplx)*num_rows);
-
-        for(int j = 0; j < num_rows; j++)
-            column[j] = samples[j][i];
-
-        FFT_preallocation_expected(column, num_rows, output[i]);
-        output_pre_transpose[i] = output[i]->output_buf;
-
-        if(i == 0)
-            show("first FFT on first col: ", output_pre_transpose[i], num_rows);
-    }
-
-    // Transpose the output //
-    // Use the samples parameter to store the transposed matrix
-    for(int i = 0; i < num_rows; i++)
-        for(int j = 0; j < num_cols; j++)
-            samples[j][i] = output_pre_transpose[i][j];
-
-    /* Do a set of FFT's on the rows of the input image "samples" */
-    // Time complexity = row_length*col_length*log(col_length)
-
-    for(int i = 0; i < num_cols; i++)
-    {
-        FFT_preallocation_expected(samples[i], num_cols,output[i]);
-        output_pre_transpose[i] = output[i]->output_buf;
-
-        if(i == 0)
-            show("first FFT on first row: ", output_pre_transpose[i], num_rows);
-    }
-
-    /* Total Time complexity == row_length*col_length*log(row_len + col_len) */
-
-
-}
-#pragma DATA_SECTION(outData, ".outData");
-ALIGN_128BYTES int16_t  outData[2*MAX_NUMPOINTS*MAX_NUMCHANNELS*2];
-
-#pragma DATA_SECTION(inData, ".inData");
-ALIGN_128BYTES int16_t  inData[2*MAX_NUMPOINTS*MAX_NUMCHANNELS*2];
-
-#pragma DATA_SECTION(pOutSum, ".pOutSum");
-ALIGN_128BYTES uint32_t pOutSum[4];
-
-
-
-#ifdef post_1st_fft
-
-        /* ........................................................................ */
-
-        /* transpose output back to input */
-
-      for (k = 0; k < numPoints*numChannels; k += numPoints*numPoints) {
-          int kk;
-          for( kk = 0; kk < numPoints*numPoints; kk++) {
-              const int
-                  kr = kk / numPoints, /* row */
-                  kc = kk % numPoints, /* column */
-                  kt = kc * numPoints + kr; /* transposed location within square matrix */
-              pX[(k+kt)*2]   = pY[(k+kk)*2];
-              pX[(k+kt)*2+1] = pY[(k+kk)*2+1];
-              /// printf( "k, kk, kr, kc, kt, pX[(k+kt)*2] = %5d, %5d, %5d, %5d, %5d, %5d, %5d\n", k, kk, kr, kc, kt, pX[(k+kt)*2], pX[(k+kt)*2+1]);
-          }
-      }
-
-
-/* ........................................................................ */
-
-        //asm(" MARK 4");
-     status = FFTLIB_fft1dBatched_i16sc_c16sc_o16sc_cn((int16_t *)pX, &bufParamsData,
-                                                     (int16_t *)pW, &bufParamsTw,
-                                                     (int16_t *)pY, &bufParamsData,
-                                                     (uint32_t *)pShift, &bufParamsShift,
-                                                     numPoints, numChannels);
-       // asm(" MARK 5");
-
-
-
-/* ........................................................................ */
-#endif
-        for (k = 0; k < numPoints*numChannels*2; k++)
-            printf( "%d, ", pY[k]);
-        printf( "\n");
-
-    }
-
-}
-
 complex_number_t * FFT_fixed(complex_number_t* samples, size_t size, complex_number_t* twiddles)
 {
 
@@ -433,9 +336,23 @@ complex_number_t * FFT_fixed(complex_number_t* samples, size_t size, complex_num
        // cmplx exponential = cexp(-2*I*M_PI*i/size) * f_odd[i];
        // output[i] = f_even[i] + exponential;
 
+       // Multiply complex exp, e.g.
+       // (3 + 2i)(1 + 4i) = 3 + 12i + 2i + 8i^2.
         complex_number_t exponential;
-        exponential.real = (f_odd[i].real*twiddles[i].real) >> 15;
-        exponential.imag = (f_odd[i].real*twiddles[i].imag) >> 15;
+       int64_t exp_temp_r = (f_odd[i].real )*(twiddles[i].real ) ;
+       int64_t exp_temp_i = (f_odd[i].imag*twiddles[i].imag);
+
+       int64_t complex_product_real = exp_temp_r - exp_temp_i;
+
+
+
+       exp_temp_r = f_odd[i].real*twiddles[i].imag;
+       exp_temp_i = f_odd[i].imag*twiddles[i].real;
+
+       int64_t complex_product_imag = exp_temp_r + exp_temp_i;
+
+        exponential.real  =(complex_product_real >> 15);
+        exponential.imag = (complex_product_imag >> 15);
 
         output[i].real = f_even[i].real +  exponential.real;
         output[i].imag = f_even[i].imag  + exponential.imag;
@@ -455,12 +372,24 @@ complex_number_t * FFT_fixed(complex_number_t* samples, size_t size, complex_num
         output[i+ size_halved].imag = f_even[i].imag  -exponential.imag;
 
 
-        printf("DEBUG FFT: (%g, %gj) \n"
+       /* printf("DEBUG FFT %d %d: (%g, %gj) \n"
                "EXP (%g, %gj) \n"
-               "A: (%g, %gj) \n",
-               output[i].real / pow(2, 15), output[i].imag / pow(2,15),
-               exponential.real / pow(2, 15), exponential .imag/ pow(2,15),
-               creal(cexp(-2*I*M_PI*i/size)), cimag( cexp(-2*I*M_PI*i/size)) );
+               "Twiddle: (%g, %gj) \n"
+              // "Even FFT: (%g, %gj)\n"
+               //"Odd FFT: (%g, %gj)\n"
+               ,
+
+            i, size,
+            output[i].real / pow(2, 15)*1000, output[i].imag / pow(2,15)*1000,
+               exponential.real / pow(2, 15)*1000, exponential .imag/ pow(2,15)*1000,
+               twiddles[i].real / pow(2,15), twiddles[i].imag / pow(2,15)
+               //,
+               //f_even[i].real / pow(2, 15)*1000, f_even[i].imag/ pow(2,15)*1000,
+             // f_odd[i].real / pow(2, 15)*1000, f_odd[i].imag/ pow(2,15)*1000
+             );*/
+
+     //   printf( "(%g, %gj)\n",
+             //   twiddles[i].real / pow(2,15), twiddles[i].imag / pow(2,15));
 
     }
 
@@ -472,18 +401,22 @@ complex_number_t * FFT_fixed(complex_number_t* samples, size_t size, complex_num
         free(f_odd);
     return output;
 }
+void scale_buffer(complex_number_t * buf, size_t size, int scale_by)
+{
+    for (int i = 0; i < size; i ++)
+    {
+        buf[i].real = buf[i].real / (int) (pow(2, 15)*scale_by);
+        buf[i].imag = buf[i].imag / (int) (pow(2, 15)*scale_by);
+
+    }
+}
 
 
 complex_number_t** FFT2_fixed(complex_number_t** samples, size_t num_rows, size_t num_cols)
 {
     complex_number_t * twiddles = malloc(sizeof(complex_number_t)*num_rows);
 
-    for(int i = 0, j = 0; i < 32; i++, j+=2)
-    {
-        twiddles[i].real = fixed_output[j];
-        twiddles[i].imag = fixed_output[j+1];
-    }
-    //generateTwiddles(num_cols, &twiddles);
+    generateTwiddles(num_cols, &twiddles);
 
     /* Do a set of FFT's on the columns of the input image "samples" */
     // Time complexity = num_col*num_rows*log(num_rows)
@@ -501,16 +434,23 @@ complex_number_t** FFT2_fixed(complex_number_t** samples, size_t num_rows, size_
         }
         output_pre_transpose[i] = FFT_fixed(column, num_rows, twiddles);
 
-        if(i == 0)
+        if(i == 31)
             show_fixed("first FFT on first col: ", output_pre_transpose[i], num_rows);
     }
 
-    // Transpose the output //
+
+    // Scale and Transpose the output //
     // Use the samples parameter to store the transposed matrix
     for(int i = 0; i < num_rows; i++)
         for(int j = 0; j < num_cols; j++) {
-            samples[j][i].real = output_pre_transpose[i][j].real;
-            samples[j][i].real = output_pre_transpose[i][j].imag;
+
+            int64_t real = output_pre_transpose[i][j].real * pow(2,15);
+            real = real / (10*pow(2,15));
+            int64_t imag = output_pre_transpose[i][j].imag * pow(2,15);
+            imag = imag / (10*pow(2,15));
+
+            samples[j][i].real = real;
+            samples[j][i].imag =imag;
 
         }
     /* Do a set of FFT's on the rows of the input image "samples" */
